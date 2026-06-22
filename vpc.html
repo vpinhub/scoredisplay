@@ -81,7 +81,7 @@
         }
         .info-row {
             display: flex; justify-content: space-between; align-items: center;
-            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
         }
         .info-label { color: var(--muted); }
         .info-val   { color: var(--text); }
@@ -90,10 +90,10 @@
         .lb-col-hd {
             flex-shrink: 0; height: 34px; display: flex; align-items: center;
             padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-            font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
             color: var(--muted); gap: 10px;
         }
-        .ch-rank { width: 32px; flex-shrink: 0; }
+        .ch-rank { width: 40px; flex-shrink: 0; }
         .ch-name { flex: 1; }
         .ch-score { text-align: right; }
 
@@ -108,10 +108,10 @@
         .lb-row.r3 { background: rgba(176,128,64,0.02); }
 
         .rank-num {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 17px;
-            width: 32px; flex-shrink: 0; text-align: center; color: var(--muted);
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px;
+            width: 40px; flex-shrink: 0; text-align: center; color: #44445a;
         }
-        .r1 .rank-num { color: var(--gold); font-size: 20px; }
+        .r1 .rank-num { color: var(--gold); font-size: 30px; }
         .r2 .rank-num { color: var(--silver); }
         .r3 .rank-num { color: var(--bronze); }
 
@@ -122,19 +122,23 @@
         .r1 .avatar { border-color: var(--gold); }
         .r2 .avatar { border-color: var(--silver); }
 
+        .player-info {
+            flex: 1; min-width: 0; display: flex; flex-direction: column;
+            justify-content: center; gap: 3px;
+        }
         .player-name {
-            flex: 1; font-weight: 700; font-size: 14px;
+            font-weight: 700; font-size: 26px; line-height: 1;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
         }
-        .r1 .player-name { color: #fff; font-size: 15px; }
+        .r1 .player-name { color: #fff; font-size: 28px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px;
-            color: var(--muted); white-space: nowrap; flex-shrink: 0; text-align: right;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 17px;
+            color: #8888a8; white-space: nowrap; line-height: 1;
         }
-        .r1 .score { color: var(--gold); font-size: 14px; }
-        .r2 .score { color: var(--silver); }
-        .r3 .score { color: var(--bronze); }
+        .r1 .score { color: var(--gold); font-size: 20px; }
+        .r2 .score { color: var(--silver); font-size: 18px; }
+        .r3 .score { color: var(--bronze); font-size: 18px; }
 
         .state-msg {
             display: flex; align-items: center; justify-content: center;
@@ -153,22 +157,20 @@
             .body { display: flex; flex-direction: row; }
             .left { width: 252px; border-right: 1px solid var(--border); }
             .tbl-img-wrap img { height: 186px; }
-            .avatar { width: 34px; height: 34px; }
-            .ch-score { width: 132px; }
+            .avatar { width: 44px; height: 44px; }
         }
         @media (orientation: portrait) {
             .body { display: flex; flex-direction: column; }
             .left { flex-direction: row; height: 128px; border-bottom: 1px solid var(--border); }
             .tbl-img-wrap { width: 170px; flex-shrink: 0; }
             .tbl-img-wrap img { height: 128px; }
-            .avatar { width: 38px; height: 38px; }
-            .player-name { font-size: 15px; }
-            .r1 .player-name { font-size: 16px; }
-            .score { font-size: 14px; }
-            .r1 .score { font-size: 15px; }
-            .rank-num { font-size: 19px; }
-            .r1 .rank-num { font-size: 22px; }
-            .ch-score { width: 150px; }
+            .avatar { width: 50px; height: 50px; }
+            .player-name { font-size: 28px; }
+            .r1 .player-name { font-size: 30px; }
+            .score { font-size: 18px; }
+            .r1 .score { font-size: 22px; }
+            .rank-num { font-size: 32px; }
+            .r1 .rank-num { font-size: 40px; }
         }
     </style>
 </head>
@@ -202,8 +204,7 @@
             <div class="lb-col-hd">
                 <span class="ch-rank">#</span>
                 <span style="width:44px;flex-shrink:0;"></span>
-                <span class="ch-name">Player</span>
-                <span class="ch-score">Score</span>
+                <span class="ch-name">Player · Score</span>
             </div>
             <div class="lb-list" id="lb-list">
                 <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
@@ -277,8 +278,10 @@
                 <img class="avatar" src="${av}"
                      onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1a1a2e&color=aaa&size=40&bold=true'"
                      alt="">
-                <span class="player-name">${p.username}</span>
-                <span class="score">${Number(p.score).toLocaleString()}</span>
+                <div class="player-info">
+                    <span class="player-name">${p.username}</span>
+                    <span class="score">${Number(p.score).toLocaleString()}</span>
+                </div>
             </div>`;
         }).join('');
     }
