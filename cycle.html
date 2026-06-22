@@ -107,10 +107,10 @@
         .lb-col-hd {
             flex-shrink: 0; height: 34px; display: flex; align-items: center;
             padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-            font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
             color: var(--muted); gap: 10px;
         }
-        .ch-rank { width: 32px; flex-shrink: 0; }
+        .ch-rank { width: 40px; flex-shrink: 0; }
         .ch-av   { width: 44px; flex-shrink: 0; }
         .ch-name { flex: 1; }
         .ch-score { text-align: right; }
@@ -139,10 +139,10 @@
         .lb-row.r3 { background: rgba(176,128,64,0.02); }
 
         .rank-num {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 17px;
-            width: 32px; flex-shrink: 0; text-align: center; color: var(--muted);
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px;
+            width: 40px; flex-shrink: 0; text-align: center; color: #44445a;
         }
-        .r1 .rank-num { color: var(--gold); font-size: 20px; }
+        .r1 .rank-num { color: var(--gold); font-size: 30px; }
         .r2 .rank-num { color: var(--silver); }
         .r3 .rank-num { color: var(--bronze); }
 
@@ -154,18 +154,18 @@
         .r2 .avatar { border-color: var(--silver); }
 
         .player-name {
-            flex: 1; font-weight: 700; font-size: 14px;
+            flex: 1; font-weight: 700; font-size: 20px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
         }
-        .r1 .player-name { color: #fff; font-size: 15px; }
+        .r1 .player-name { color: #fff; font-size: 22px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px;
-            color: var(--muted); white-space: nowrap; flex-shrink: 0; text-align: right;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 18px;
+            color: #8888a8; white-space: nowrap; flex-shrink: 0; text-align: right;
         }
-        .r1 .score { color: var(--gold); font-size: 14px; }
-        .r2 .score { color: var(--silver); }
-        .r3 .score { color: var(--bronze); }
+        .r1 .score { color: var(--gold); font-size: 22px; }
+        .r2 .score { color: var(--silver); font-size: 20px; }
+        .r3 .score { color: var(--bronze); font-size: 19px; }
 
         /* ── STATE MESSAGES ── */
         .state-msg {
@@ -186,8 +186,8 @@
             .body { display: flex; flex-direction: row; }
             .left { width: 252px; border-right: 1px solid var(--border); }
             .tbl-img-wrap img { height: 186px; }
-            .avatar { width: 34px; height: 34px; }
-            .ch-score { width: 132px; }
+            .avatar { width: 44px; height: 44px; }
+            .ch-score { width: 170px; }
             /* scroll rows match top-10 row height exactly */
             .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 34px) / 10); }
         }
@@ -198,14 +198,15 @@
             .left { flex-direction: row; height: 128px; border-bottom: 1px solid var(--border); }
             .tbl-img-wrap { width: 170px; flex-shrink: 0; }
             .tbl-img-wrap img { height: 128px; }
-            .avatar { width: 38px; height: 38px; }
-            .player-name { font-size: 15px; }
-            .r1 .player-name { font-size: 16px; }
-            .score { font-size: 14px; }
-            .r1 .score { font-size: 15px; }
-            .rank-num { font-size: 19px; }
-            .r1 .rank-num { font-size: 22px; }
-            .ch-score { width: 150px; }
+            .avatar { width: 50px; height: 50px; }
+            .player-name { font-size: 22px; }
+            .r1 .player-name { font-size: 24px; }
+            .score { font-size: 20px; }
+            .r1 .score { font-size: 24px; }
+            .r2 .score { font-size: 22px; }
+            .rank-num { font-size: 28px; }
+            .r1 .rank-num { font-size: 34px; }
+            .ch-score { width: 180px; }
             .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 128px - 34px) / 10); }
         }
     </style>
