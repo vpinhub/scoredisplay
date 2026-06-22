@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Special When Lit • Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --accent:  #d946ef;
+            --bg:      #060610;
+            --surface: #0d0d1a;
+            --border:  rgba(255,255,255,0.06);
+            --text:    #e4e4f0;
+            --muted:   #52526a;
+            --gold:    #fbbf24;
+            --silver:  #94a3b8;
+            --bronze:  #b08040;
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Encode Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .body   { flex: 1; min-height: 0; overflow: hidden; }
+
+        .hd {
+            height: 52px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 18px;
+            background: var(--accent);
+            box-shadow: 0 2px 24px rgba(0,0,0,0.6);
+        }
+        .hd-title {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 17px; letter-spacing: 2px; text-transform: uppercase; color: #fff;
+        }
+        .hd-right {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: rgba(255,255,255,0.8);
+        }
+        #period-badge { font-size: 10px; }
+        #refresh-pill {
+            background: rgba(0,0,0,0.22); border-radius: 20px; padding: 3px 11px;
+            font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 1px;
+            display: none;
+        }
+
+        .left {
+            background: var(--surface); display: flex; flex-direction: column;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .tbl-img-wrap { flex-shrink: 0; position: relative; overflow: hidden; background: #0a0a18; }
+        .tbl-img-wrap img { width: 100%; object-fit: cover; display: block; }
+        .tbl-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(5,5,18,0.96) 0%, transparent 100%);
+            padding: 10px 12px 8px;
+        }
+        .tbl-name {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 11px; letter-spacing: 1px; text-transform: uppercase; line-height: 1.3; color: #fff;
+        }
+        .tbl-mfr {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--accent); margin-top: 2px;
+        }
+        .info-block {
+            flex: 1; min-height: 0; padding: 10px 14px;
+            display: flex; flex-direction: column; justify-content: center; gap: 9px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .info-label { color: var(--muted); }
+        .info-val   { color: var(--text); }
+
+        .right { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+        .lb-col-hd {
+            flex-shrink: 0; height: 34px; display: flex; align-items: center;
+            padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+            font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--muted); gap: 10px;
+        }
+        .ch-rank { width: 32px; flex-shrink: 0; }
+        .ch-name { flex: 1; }
+        .ch-score { text-align: right; }
+
+        .lb-list { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+        .lb-row {
+            flex: 1; min-height: 0; display: flex; align-items: center;
+            padding: 0 14px; gap: 10px; border-bottom: 1px solid var(--border);
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-row.r1 { background: rgba(251,191,36,0.05); }
+        .lb-row.r2 { background: rgba(148,163,184,0.02); }
+        .lb-row.r3 { background: rgba(176,128,64,0.02); }
+
+        .rank-num {
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 17px;
+            width: 32px; flex-shrink: 0; text-align: center; color: var(--muted);
+        }
+        .r1 .rank-num { color: var(--gold); font-size: 20px; }
+        .r2 .rank-num { color: var(--silver); }
+        .r3 .rank-num { color: var(--bronze); }
+
+        .avatar {
+            flex-shrink: 0; border-radius: 50%; border: 2px solid var(--border);
+            object-fit: cover; background: #1a1a2e;
+        }
+        .r1 .avatar { border-color: var(--gold); }
+        .r2 .avatar { border-color: var(--silver); }
+
+        .player-name {
+            flex: 1; font-weight: 700; font-size: 14px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+        }
+        .r1 .player-name { color: #fff; font-size: 15px; }
+
+        .score {
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px;
+            color: var(--muted); white-space: nowrap; flex-shrink: 0; text-align: right;
+        }
+        .r1 .score { color: var(--gold); font-size: 14px; }
+        .r2 .score { color: var(--silver); }
+        .r3 .score { color: var(--bronze); }
+
+        .state-msg {
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 14px; height: 100%;
+            color: var(--muted); font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .spinner {
+            width: 28px; height: 28px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (orientation: landscape) {
+            .body { display: flex; flex-direction: row; }
+            .left { width: 252px; border-right: 1px solid var(--border); }
+            .tbl-img-wrap img { height: 186px; }
+            .avatar { width: 34px; height: 34px; }
+            .ch-score { width: 132px; }
+        }
+        @media (orientation: portrait) {
+            .body { display: flex; flex-direction: column; }
+            .left { flex-direction: row; height: 128px; border-bottom: 1px solid var(--border); }
+            .tbl-img-wrap { width: 170px; flex-shrink: 0; }
+            .tbl-img-wrap img { height: 128px; }
+            .avatar { width: 38px; height: 38px; }
+            .player-name { font-size: 15px; }
+            .r1 .player-name { font-size: 16px; }
+            .score { font-size: 14px; }
+            .r1 .score { font-size: 15px; }
+            .rank-num { font-size: 19px; }
+            .r1 .rank-num { font-size: 22px; }
+            .ch-score { width: 150px; }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+    <header class="hd">
+        <div class="hd-title">Special When Lit</div>
+        <div class="hd-right">
+            <span id="period-badge">Loading…</span>
+            <span id="refresh-pill">↻ --:--</span>
+        </div>
+    </header>
+    <div class="body">
+        <div class="left">
+            <div class="tbl-img-wrap">
+                <img id="tbl-img" src="" alt=""
+                     onerror="this.onerror=null;this.src='https://placehold.co/400x200/0d0d1a/52526a?text=Pinball'">
+                <div class="tbl-overlay">
+                    <div class="tbl-name" id="tbl-name">Loading…</div>
+                    <div class="tbl-mfr"  id="tbl-mfr"></div>
+                </div>
+            </div>
+            <div class="info-block">
+                <div class="info-row"><span class="info-label">Cutoff</span><span class="info-val">Sun 2:00 PM ET</span></div>
+                <div class="info-row"><span class="info-label">Platform</span><span class="info-val">iScored</span></div>
+                <div class="info-row"><span class="info-label">Players</span><span class="info-val" id="player-count">—</span></div>
+                <div class="info-row"><span class="info-label">Updated</span><span class="info-val" id="last-updated">—</span></div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="lb-col-hd">
+                <span class="ch-rank">#</span>
+                <span style="width:44px;flex-shrink:0;"></span>
+                <span class="ch-name">Player</span>
+                <span class="ch-score">High Score</span>
+            </div>
+            <div class="lb-list" id="lb-list">
+                <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const CFG = {
+        roomId: '1011', cutoffDay: 0, cutoffHour: 14,
+        cutoffTZ: 'America/New_York', topN: 10, refreshMs: 5 * 60 * 1000
+    };
+    const AVATAR_BASE = 'https://vpinhub.github.io/special-when-lit-leaderboard/img/';
+    const API_URL     = `https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=${CFG.roomId}`;
+    const VPS_URL     = 'https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json';
+
+    let vpsDB = [], refreshTimer, countdownTimer, secsLeft;
+
+    function calcPeriod() {
+        const now = new Date(new Date().toLocaleString('en-US', { timeZone: CFG.cutoffTZ }));
+        let end = new Date(now); end.setHours(CFG.cutoffHour, 0, 0, 0);
+        const diff = (CFG.cutoffDay - now.getDay() + 7) % 7;
+        end.setDate(end.getDate() + diff);
+        if (diff === 0 && now.getHours() >= CFG.cutoffHour) end.setDate(end.getDate() + 7);
+        let start = new Date(end); start.setDate(start.getDate() - 7);
+        const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+        document.getElementById('period-badge').textContent = `${fmt(start)} – ${fmt(end)}`;
+    }
+
+    function startCountdown() {
+        clearInterval(countdownTimer); secsLeft = CFG.refreshMs / 1000;
+        const el = document.getElementById('refresh-pill');
+        countdownTimer = setInterval(() => {
+            if (--secsLeft <= 0) secsLeft = CFG.refreshMs / 1000;
+            el.textContent = `↻ ${String(Math.floor(secsLeft/60)).padStart(2,'0')}:${String(secsLeft%60).padStart(2,'0')}`;
+        }, 1000);
+    }
+
+    function processIScored(data) {
+        const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+        const stats = {};
+        game.scores
+            .filter(s => !(s.name.toLowerCase() === 'init' && parseInt(s.score,10) === 0))
+            .forEach(s => {
+                const val = parseInt(s.score, 10);
+                if (!stats[s.name]) stats[s.name] = { name: s.name, high: 0 };
+                if (val > stats[s.name].high) stats[s.name].high = val;
+            });
+        const sorted = Object.values(stats).sort((a,b) => b.high - a.high).slice(0, CFG.topN);
+        document.getElementById('player-count').textContent = Object.keys(stats).length;
+        document.getElementById('last-updated').textContent =
+            new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const tag = JSON.stringify(game).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
+        renderTable(tag ? vpsDB.find(t => t.id === tag[1]) : null, game.longName);
+        renderBoard(sorted);
+    }
+
+    function renderTable(e, fallback) {
+        const img = e?.b2sFiles?.[0]?.imgUrl || e?.tableFiles?.[0]?.imgUrl || '';
+        if (img) document.getElementById('tbl-img').src = img;
+        document.getElementById('tbl-name').textContent = e ? e.name : (fallback || 'Tournament Table');
+        document.getElementById('tbl-mfr').textContent  = e ? e.manufacturer : 'VPinhub';
+    }
+
+    function renderBoard(players) {
+        if (!players.length) {
+            document.getElementById('lb-list').innerHTML = '<div class="state-msg"><span>No scores yet</span></div>';
+            return;
+        }
+        const cls = i => i===0?'r1':i===1?'r2':i===2?'r3':'';
+        document.getElementById('lb-list').innerHTML = players.map((p,i) => `
+            <div class="lb-row ${cls(i)}">
+                <span class="rank-num">${i+1}</span>
+                <img class="avatar"
+                     src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g,'_')}.gif"
+                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=40&bold=true'"
+                     alt="">
+                <span class="player-name">${p.name}</span>
+                <span class="score">${p.high.toLocaleString()}</span>
+            </div>`).join('');
+    }
+
+    async function load() {
+        try {
+            if (!vpsDB.length) { const r = await fetch(VPS_URL); vpsDB = await r.json(); }
+            const r = await fetch(API_URL); const d = await r.json();
+            if (d) processIScored(d);
+        } catch(e) {
+            console.error(e);
+            document.getElementById('lb-list').innerHTML = '<div class="state-msg"><span>⚠ Could not load scores</span></div>';
+        }
+    }
+
+    function scheduleRefresh() {
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => { load(); startCountdown(); scheduleRefresh(); }, CFG.refreshMs);
+    }
+
+    if (new URLSearchParams(window.location.search).has('timer'))
+        document.getElementById('refresh-pill').style.display = 'block';
+
+    calcPeriod(); startCountdown(); load(); scheduleRefresh();
+</script>
+</body>
+</html>

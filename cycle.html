@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>VPinhub · Live Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Encode+Sans:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #060610;
+            --surface: #0d0d1a;
+            --border:  rgba(255,255,255,0.06);
+            --text:    #e4e4f0;
+            --muted:   #52526a;
+            --gold:    #fbbf24;
+            --silver:  #94a3b8;
+            --bronze:  #b08040;
+        }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Encode Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── LAYOUT ── */
+        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+        /* ── HEADER ── */
+        .hd {
+            height: 52px; flex-shrink: 0; position: relative;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px;
+            background: #6366f1; /* updated by JS */
+            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            transition: background 0.4s;
+        }
+        .hd-left { display: flex; flex-direction: column; gap: 2px; }
+        .hd-title {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
+            color: #fff; line-height: 1;
+        }
+        .hd-mode {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: rgba(255,255,255,0.6);
+        }
+        .hd-dots { display: flex; gap: 8px; align-items: center; }
+        .dot {
+            width: 9px; height: 9px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.35s;
+        }
+        .dot.active { background: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.92); }
+
+        /* progress bar — hidden unless ?timer */
+        .progress-bar {
+            position: absolute; bottom: 0; left: 0;
+            height: 3px; background: rgba(255,255,255,0.38);
+            width: 100%; display: none; pointer-events: none;
+        }
+
+        /* ── BODY (fades between comps) ── */
+        .body { flex: 1; min-height: 0; overflow: hidden; }
+
+        /* ── LEFT PANEL ── */
+        .left {
+            background: var(--surface); display: flex;
+            flex-direction: column; overflow: hidden; flex-shrink: 0;
+        }
+        .tbl-img-wrap { flex-shrink: 0; position: relative; overflow: hidden; background: #0a0a18; }
+        .tbl-img-wrap img { width: 100%; object-fit: cover; display: block; }
+        .tbl-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(5,5,18,0.96) 0%, transparent 100%);
+            padding: 10px 12px 8px;
+        }
+        .tbl-name {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+            line-height: 1.3; color: #fff;
+        }
+        .tbl-mfr {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; margin-top: 2px; transition: color 0.4s;
+        }
+        .info-block {
+            flex: 1; min-height: 0; padding: 10px 14px;
+            display: flex; flex-direction: column; justify-content: center; gap: 9px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .info-label { color: var(--muted); }
+        .info-val   { color: var(--text); }
+
+        /* ── RIGHT PANEL ── */
+        .right { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+        .lb-col-hd {
+            flex-shrink: 0; height: 34px; display: flex; align-items: center;
+            padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+            font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
+            color: var(--muted); gap: 10px;
+        }
+        .ch-rank { width: 32px; flex-shrink: 0; }
+        .ch-av   { width: 44px; flex-shrink: 0; }
+        .ch-name { flex: 1; }
+        .ch-score { text-align: right; }
+
+        /* ── LEADERBOARD ── */
+        /* lb-viewport clips the scrolling list */
+        .lb-viewport { flex: 1; min-height: 0; overflow: hidden; }
+
+        .lb-list { display: flex; flex-direction: column; width: 100%; }
+
+        /* top-10: rows share the space equally */
+        .lb-list.mode-top10       { height: 100%; }
+        .lb-list.mode-top10 .lb-row { flex: 1; min-height: 0; }
+
+        /* scroll: rows are fixed height — list extends beyond viewport */
+        .lb-list.mode-scroll .lb-row { flex: none; }
+
+        .lb-row {
+            display: flex; align-items: center;
+            padding: 0 14px; gap: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .lb-row:last-child { border-bottom: none; }
+        .lb-row.r1 { background: rgba(251,191,36,0.05); }
+        .lb-row.r2 { background: rgba(148,163,184,0.02); }
+        .lb-row.r3 { background: rgba(176,128,64,0.02); }
+
+        .rank-num {
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 17px;
+            width: 32px; flex-shrink: 0; text-align: center; color: var(--muted);
+        }
+        .r1 .rank-num { color: var(--gold); font-size: 20px; }
+        .r2 .rank-num { color: var(--silver); }
+        .r3 .rank-num { color: var(--bronze); }
+
+        .avatar {
+            flex-shrink: 0; border-radius: 50%;
+            border: 2px solid var(--border); object-fit: cover; background: #1a1a2e;
+        }
+        .r1 .avatar { border-color: var(--gold); }
+        .r2 .avatar { border-color: var(--silver); }
+
+        .player-name {
+            flex: 1; font-weight: 700; font-size: 14px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+        }
+        .r1 .player-name { color: #fff; font-size: 15px; }
+
+        .score {
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 13px;
+            color: var(--muted); white-space: nowrap; flex-shrink: 0; text-align: right;
+        }
+        .r1 .score { color: var(--gold); font-size: 14px; }
+        .r2 .score { color: var(--silver); }
+        .r3 .score { color: var(--bronze); }
+
+        /* ── STATE MESSAGES ── */
+        .state-msg {
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 14px; height: 100%;
+            color: var(--muted); font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .spinner {
+            width: 28px; height: 28px; border: 3px solid var(--border);
+            border-top-color: currentColor; border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── LANDSCAPE ── */
+        @media (orientation: landscape) {
+            .body { display: flex; flex-direction: row; }
+            .left { width: 252px; border-right: 1px solid var(--border); }
+            .tbl-img-wrap img { height: 186px; }
+            .avatar { width: 34px; height: 34px; }
+            .ch-score { width: 132px; }
+            /* scroll rows match top-10 row height exactly */
+            .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 34px) / 10); }
+        }
+
+        /* ── PORTRAIT ── */
+        @media (orientation: portrait) {
+            .body { display: flex; flex-direction: column; }
+            .left { flex-direction: row; height: 128px; border-bottom: 1px solid var(--border); }
+            .tbl-img-wrap { width: 170px; flex-shrink: 0; }
+            .tbl-img-wrap img { height: 128px; }
+            .avatar { width: 38px; height: 38px; }
+            .player-name { font-size: 15px; }
+            .r1 .player-name { font-size: 16px; }
+            .score { font-size: 14px; }
+            .r1 .score { font-size: 15px; }
+            .rank-num { font-size: 19px; }
+            .r1 .rank-num { font-size: 22px; }
+            .ch-score { width: 150px; }
+            .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 128px - 34px) / 10); }
+        }
+    </style>
+</head>
+<body>
+<div class="layout">
+
+    <header class="hd" id="hd">
+        <div class="hd-left">
+            <div class="hd-title" id="hd-title">VPinhub</div>
+            <div class="hd-mode"  id="hd-mode">Loading…</div>
+        </div>
+        <div class="hd-dots">
+            <span class="dot" id="dot-cc"></span>
+            <span class="dot" id="dot-swl"></span>
+            <span class="dot" id="dot-ttd"></span>
+        </div>
+        <div class="progress-bar" id="progress-bar"></div>
+    </header>
+
+    <div class="body" id="body">
+
+        <div class="left">
+            <div class="tbl-img-wrap">
+                <img id="tbl-img" src="" alt=""
+                     onerror="this.onerror=null;this.src='https://placehold.co/400x200/0d0d1a/52526a?text=Pinball'">
+                <div class="tbl-overlay">
+                    <div class="tbl-name" id="tbl-name">—</div>
+                    <div class="tbl-mfr"  id="tbl-mfr"></div>
+                </div>
+            </div>
+            <div class="info-block">
+                <div class="info-row"><span class="info-label">Cutoff</span>  <span class="info-val" id="info-cutoff">—</span></div>
+                <div class="info-row"><span class="info-label">Platform</span><span class="info-val" id="info-platform">—</span></div>
+                <div class="info-row"><span class="info-label">Players</span> <span class="info-val" id="info-players">—</span></div>
+            </div>
+        </div>
+
+        <div class="right">
+            <div class="lb-col-hd">
+                <span class="ch-rank">#</span>
+                <span class="ch-av"></span>
+                <span class="ch-name">Player</span>
+                <span class="ch-score">Score</span>
+            </div>
+            <div class="lb-viewport" id="lb-viewport">
+                <div class="lb-list mode-top10" id="lb-list">
+                    <div class="state-msg"><div class="spinner"></div><span>Loading scores</span></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ── CONFIG ──────────────────────────────────────────────
+    const TOP10_MS     = 60_000;   // ms to show top 10 before scrolling
+    const SCROLL_SPEED = 15;       // px per second during scroll
+    const SCROLL_PAUSE = 2_500;    // ms to hold at end of scroll before next comp
+    const FADE_MS      = 450;      // ms for cross-comp fade transition
+    const SHOW_TIMER   = new URLSearchParams(window.location.search).has('timer');
+
+    const AVATAR_BASE = 'https://vpinhub.github.io/special-when-lit-leaderboard/img/';
+    const VPS_URL     = 'https://raw.githubusercontent.com/VirtualPinballSpreadsheet/vps-db/main/db/vpsdb.json';
+
+    const COMPS = ['cc', 'swl', 'ttd'];
+
+    const CFG = {
+        cc:  { label: 'Competition Corner', accent: '#6366f1', cutoff: 'Mon 12:00 AM PT', platform: 'VPC Discord',
+               url: 'https://virtualpinballchat.com/vpc/api/v1/currentWeek?channelName=competition-corner' },
+        swl: { label: 'Special When Lit',   accent: '#d946ef', cutoff: 'Sun 2:00 PM ET',  platform: 'iScored',
+               url: 'https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=1011' },
+        ttd: { label: 'Thursday Throwdown', accent: '#f97316', cutoff: 'Thu 2:00 PM ET',  platform: 'iScored',
+               url: 'https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=700' }
+    };
+
+    // ── STATE ────────────────────────────────────────────────
+    let compIdx  = 0;          // index into COMPS
+    let phase    = 'top10';    // 'top10' | 'scroll'
+    let vpsDB    = [];
+    let allData  = {};         // { cc: {...}, swl: {...}, ttd: {...} }
+    let cycleGen = 0;          // incremented on each advance to cancel stale callbacks
+    let phaseTimer = null;
+
+    // ── BOOT ─────────────────────────────────────────────────
+    async function boot() {
+        if (SHOW_TIMER) document.getElementById('progress-bar').style.display = 'block';
+
+        // Fetch VPS DB and all comp data concurrently
+        const [vps] = await Promise.allSettled([
+            fetch(VPS_URL).then(r => r.json()),
+            fetchAll()
+        ]);
+        if (vps.status === 'fulfilled') vpsDB = vps.value;
+
+        startCycle();
+    }
+
+    async function fetchAll() {
+        await Promise.all(COMPS.map(c => fetchComp(c)));
+    }
+
+    async function fetchComp(comp) {
+        try {
+            const r = await fetch(CFG[comp].url);
+            const d = await r.json();
+            allData[comp] = comp === 'cc' ? parseCC(d) : parseIScored(d);
+        } catch (e) {
+            console.error(`Failed to load ${comp}`, e);
+            allData[comp] = null;
+        }
+    }
+
+    // ── DATA PARSERS ─────────────────────────────────────────
+    function parseCC(weekData) {
+        const players = (weekData.scores || [])
+            .sort((a, b) => b.score - a.score)
+            .map(p => ({ name: p.username, high: p.score, avatar: p.userAvatarUrl || null }));
+
+        const vpsEntry = vpsDB.find(t =>
+            (t.tableFiles || []).some(f => f.id === weekData.vpsId)
+        );
+        return {
+            players,
+            tableName: vpsEntry ? vpsEntry.name : (weekData.table || '—'),
+            mfr:       vpsEntry ? vpsEntry.manufacturer : 'VPC Competition',
+            img:       vpsEntry?.b2sFiles?.[0]?.imgUrl || vpsEntry?.tableFiles?.[0]?.imgUrl || ''
+        };
+    }
+
+    function parseIScored(data) {
+        const game = data.find(g => JSON.stringify(g).includes('game=')) || data[0];
+        const stats = {};
+        (game.scores || [])
+            .filter(s => !(s.name.toLowerCase() === 'init' && parseInt(s.score, 10) === 0))
+            .forEach(s => {
+                const val = parseInt(s.score, 10);
+                if (!stats[s.name]) stats[s.name] = { name: s.name, high: 0, avatar: null };
+                if (val > stats[s.name].high) stats[s.name].high = val;
+            });
+        const players = Object.values(stats).sort((a, b) => b.high - a.high);
+
+        const tag = JSON.stringify(game).match(/game=([a-zA-Z0-9-_]+)[^#]*#([a-zA-Z0-9-_]+)/);
+        const vpsEntry = tag ? vpsDB.find(t => t.id === tag[1]) : null;
+        return {
+            players,
+            tableName: vpsEntry ? vpsEntry.name : (game.longName || '—'),
+            mfr:       vpsEntry ? vpsEntry.manufacturer : 'VPinhub',
+            img:       vpsEntry?.b2sFiles?.[0]?.imgUrl || vpsEntry?.tableFiles?.[0]?.imgUrl || ''
+        };
+    }
+
+    // ── CYCLE ENGINE ─────────────────────────────────────────
+    function startCycle() {
+        compIdx = 0;
+        phase   = 'top10';
+        showComp();
+    }
+
+    function showComp() {
+        const comp = COMPS[compIdx];
+        const cfg  = CFG[comp];
+        const d    = allData[comp];
+
+        // Header
+        document.getElementById('hd').style.background    = cfg.accent;
+        document.getElementById('hd-title').textContent   = cfg.label;
+        document.getElementById('hd-mode').textContent    = phase === 'top10' ? 'Top 10' : 'All Scores';
+
+        // Dots
+        COMPS.forEach((c, i) =>
+            document.getElementById('dot-' + c).classList.toggle('active', i === compIdx)
+        );
+
+        // Left panel
+        document.getElementById('info-cutoff').textContent   = cfg.cutoff;
+        document.getElementById('info-platform').textContent = cfg.platform;
+        document.getElementById('tbl-mfr').style.color       = cfg.accent;
+
+        if (!d) {
+            document.getElementById('info-players').textContent = '—';
+            document.getElementById('lb-list').innerHTML =
+                '<div class="state-msg"><span>⚠ No data available</span></div>';
+            phaseTimer = setTimeout(advance, 10_000);
+            return;
+        }
+
+        document.getElementById('info-players').textContent = d.players.length;
+        document.getElementById('tbl-img').src  = d.img || 'https://placehold.co/400x200/0d0d1a/52526a?text=Pinball';
+        document.getElementById('tbl-name').textContent = d.tableName;
+        document.getElementById('tbl-mfr').textContent  = d.mfr;
+
+        if (phase === 'top10') doTop10(d.players);
+        else                   doScroll(d.players);
+    }
+
+    // ── TOP 10 PHASE ─────────────────────────────────────────
+    function doTop10(players) {
+        const listEl = document.getElementById('lb-list');
+        listEl.style.transition = 'none';
+        listEl.style.transform  = '';
+        listEl.classList.replace('mode-scroll', 'mode-top10');
+
+        renderRows(players.slice(0, 10));
+
+        // Animate progress bar across the 60s window
+        if (SHOW_TIMER) {
+            const bar = document.getElementById('progress-bar');
+            bar.style.transition = 'none';
+            bar.style.width      = '100%';
+            bar.offsetWidth;    // force reflow so transition fires
+            bar.style.transition = `width ${TOP10_MS / 1000}s linear`;
+            bar.style.width      = '0%';
+        }
+
+        phaseTimer = setTimeout(enterScrollPhase, TOP10_MS);
+    }
+
+    function enterScrollPhase() {
+        clearTimeout(phaseTimer);
+        phase = 'scroll';
+        document.getElementById('hd-mode').textContent = 'All Scores';
+
+        if (SHOW_TIMER) {
+            const bar = document.getElementById('progress-bar');
+            bar.style.transition = 'none';
+            bar.style.width = '0%';
+        }
+
+        const d = allData[COMPS[compIdx]];
+        if (d) doScroll(d.players);
+        else   advance();
+    }
+
+    // ── SCROLL PHASE ─────────────────────────────────────────
+    function doScroll(players) {
+        const listEl     = document.getElementById('lb-list');
+        const viewportEl = document.getElementById('lb-viewport');
+        const myGen      = ++cycleGen;
+
+        listEl.style.transition = 'none';
+        listEl.style.transform  = '';
+        listEl.classList.replace('mode-top10', 'mode-scroll');
+
+        renderRows(players);
+
+        // Read heights after browser layout
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (cycleGen !== myGen) return; // superseded
+
+            const viewH      = viewportEl.clientHeight;
+            const listH      = listEl.scrollHeight;
+            const scrollDist = Math.max(0, listH - viewH);
+
+            if (scrollDist <= 0) {
+                // All players already visible — hold then advance
+                phaseTimer = setTimeout(advance, SCROLL_PAUSE);
+                return;
+            }
+
+            const duration = scrollDist / SCROLL_SPEED;
+            listEl.style.transition = `transform ${duration}s linear`;
+            listEl.style.transform  = `translateY(${-scrollDist}px)`;
+
+            listEl.addEventListener('transitionend', () => {
+                if (cycleGen !== myGen) return;
+                phaseTimer = setTimeout(advance, SCROLL_PAUSE);
+            }, { once: true });
+        }));
+    }
+
+    // ── ADVANCE ──────────────────────────────────────────────
+    // Called when a phase ends. Fades body, moves to next comp/phase, fades back in.
+    function advance() {
+        cycleGen++;
+        clearTimeout(phaseTimer);
+
+        const bodyEl = document.getElementById('body');
+        bodyEl.style.transition = `opacity ${FADE_MS}ms`;
+        bodyEl.style.opacity    = '0';
+
+        setTimeout(() => {
+            // Reset scroll
+            const listEl = document.getElementById('lb-list');
+            listEl.style.transition = 'none';
+            listEl.style.transform  = '';
+
+            // Next state
+            compIdx = (compIdx + 1) % COMPS.length;
+            phase   = 'top10';
+
+            // Refresh all data once per full loop
+            if (compIdx === 0) fetchAll();
+
+            showComp();
+
+            bodyEl.style.transition = `opacity ${FADE_MS}ms`;
+            bodyEl.style.opacity    = '1';
+        }, FADE_MS);
+    }
+
+    // ── ROW RENDERING ────────────────────────────────────────
+    function renderRows(players) {
+        if (!players.length) {
+            document.getElementById('lb-list').innerHTML =
+                '<div class="state-msg"><span>No scores yet</span></div>';
+            return;
+        }
+        const cls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+        document.getElementById('lb-list').innerHTML = players.map((p, i) => {
+            const src = p.avatar ||
+                (AVATAR_BASE + p.name.toLowerCase().replace(/\s+/g, '_') + '.gif');
+            const fb  = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=40&bold=true`;
+            return `
+            <div class="lb-row ${cls(i)}">
+                <span class="rank-num">${i + 1}</span>
+                <img class="avatar" src="${src}"
+                     onerror="this.onerror=null;this.src='${fb}'" alt="">
+                <span class="player-name">${p.name}</span>
+                <span class="score">${Number(p.high).toLocaleString()}</span>
+            </div>`;
+        }).join('');
+    }
+
+    boot();
+</script>
+</body>
+</html>
