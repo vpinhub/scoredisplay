@@ -153,19 +153,23 @@
         .r1 .avatar { border-color: var(--gold); }
         .r2 .avatar { border-color: var(--silver); }
 
+        .player-info {
+            flex: 1; min-width: 0; display: flex; flex-direction: column;
+            justify-content: center; gap: 3px;
+        }
         .player-name {
-            flex: 1; font-weight: 700; font-size: 20px;
+            font-weight: 700; font-size: 26px; line-height: 1;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
         }
-        .r1 .player-name { color: #fff; font-size: 22px; }
+        .r1 .player-name { color: #fff; font-size: 28px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 18px;
-            color: #8888a8; white-space: nowrap; flex-shrink: 0; text-align: right;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 17px;
+            color: #8888a8; white-space: nowrap; line-height: 1;
         }
-        .r1 .score { color: var(--gold); font-size: 22px; }
-        .r2 .score { color: var(--silver); font-size: 20px; }
-        .r3 .score { color: var(--bronze); font-size: 19px; }
+        .r1 .score { color: var(--gold); font-size: 20px; }
+        .r2 .score { color: var(--silver); font-size: 18px; }
+        .r3 .score { color: var(--bronze); font-size: 18px; }
 
         /* ── STATE MESSAGES ── */
         .state-msg {
@@ -187,7 +191,6 @@
             .left { width: 252px; border-right: 1px solid var(--border); }
             .tbl-img-wrap img { height: 186px; }
             .avatar { width: 44px; height: 44px; }
-            .ch-score { width: 170px; }
             /* scroll rows match top-10 row height exactly */
             .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 34px) / 10); }
         }
@@ -199,14 +202,12 @@
             .tbl-img-wrap { width: 170px; flex-shrink: 0; }
             .tbl-img-wrap img { height: 128px; }
             .avatar { width: 50px; height: 50px; }
-            .player-name { font-size: 22px; }
-            .r1 .player-name { font-size: 24px; }
-            .score { font-size: 20px; }
-            .r1 .score { font-size: 24px; }
-            .r2 .score { font-size: 22px; }
-            .rank-num { font-size: 28px; }
-            .r1 .rank-num { font-size: 34px; }
-            .ch-score { width: 180px; }
+            .player-name { font-size: 28px; }
+            .r1 .player-name { font-size: 30px; }
+            .score { font-size: 18px; }
+            .r1 .score { font-size: 22px; }
+            .rank-num { font-size: 32px; }
+            .r1 .rank-num { font-size: 40px; }
             .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 128px - 34px) / 10); }
         }
     </style>
@@ -249,8 +250,7 @@
             <div class="lb-col-hd">
                 <span class="ch-rank">#</span>
                 <span class="ch-av"></span>
-                <span class="ch-name">Player</span>
-                <span class="ch-score">Score</span>
+                <span class="ch-name">Player · Score</span>
             </div>
             <div class="lb-viewport" id="lb-viewport">
                 <div class="lb-list mode-top10" id="lb-list">
@@ -526,8 +526,10 @@
                 <span class="rank-num">${i + 1}</span>
                 <img class="avatar" src="${src}"
                      onerror="this.onerror=null;this.src='${fb}'" alt="">
-                <span class="player-name">${p.name}</span>
-                <span class="score">${Number(p.high).toLocaleString()}</span>
+                <div class="player-info">
+                    <span class="player-name">${p.name}</span>
+                    <span class="score">${Number(p.high).toLocaleString()}</span>
+                </div>
             </div>`;
         }).join('');
     }
