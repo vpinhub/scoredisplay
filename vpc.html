@@ -43,6 +43,10 @@
         .hd-title {
             font-family: 'Orbitron', sans-serif; font-weight: 900;
             font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 15px; 
         }
         .hd-right {
             display: flex; align-items: center; gap: 12px;
@@ -188,7 +192,7 @@
 <body>
 <div class="layout">
     <header class="hd">
-        <div class="hd-title">Competition Corner</div>
+        <div class="hd-title" id="main-header-title">Loading Table...</div>
         <div class="hd-right">
             <span id="period-badge">Loading…</span>
             <span id="refresh-pill">↻ --:--</span>
@@ -263,7 +267,16 @@
     function renderTable(entry, fallbackName, version) {
         const img = entry?.b2sFiles?.[0]?.imgUrl || entry?.tableFiles?.[0]?.imgUrl || '';
         if (img) document.getElementById('tbl-img').src = img;
-        document.getElementById('tbl-name').textContent = entry ? entry.name : (fallbackName || 'Tournament Table');
+        
+        // Define the table name
+        const tableName = entry ? entry.name : (fallbackName || 'Tournament Table');
+        
+        // Push the table name to the top main header
+        document.getElementById('main-header-title').textContent = tableName;
+        
+        // Hide the original overlay title to declutter the image, but keep the manufacturer info
+        document.getElementById('tbl-name').style.display = 'none';
+        
         document.getElementById('tbl-mfr').textContent  = entry
             ? `${entry.manufacturer}${version ? ' · v'+version : ''}`
             : (version ? 'v'+version : 'VPC Competition');
