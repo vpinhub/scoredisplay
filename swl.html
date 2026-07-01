@@ -11,213 +11,242 @@
 
         :root {
             --accent:  #d946ef;
-            --bg:      #060610;
-            --surface: #0d0d1a;
-            --border:  rgba(255,255,255,0.06);
-            --text:    #e4e4f0;
-            --muted:   #52526a;
+            --bg-solid: #080812;
             --gold:    #fbbf24;
             --silver:  #94a3b8;
             --bronze:  #b08040;
+            --text:    #ffffff;
+            --muted:   #a0a0b8;
         }
 
         html, body {
             width: 100%; height: 100%;
             overflow: hidden;
-            background: var(--bg);
+            background: #000;
             color: var(--text);
             font-family: 'Encode Sans', sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .body   { flex: 1; min-height: 0; overflow: hidden; }
-
-        .hd {
-            height: 96px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 24px;
-            background: var(--accent);
-            box-shadow: 0 2px 24px rgba(0,0,0,0.6);
+        .layout { 
+            display: flex; flex-direction: column; 
+            height: 100vh; overflow: hidden; 
         }
+        
+        /* HEADER - Solid Background */
+        .hd {
+            height: 110px; flex-shrink: 0;
+            display: grid;
+            grid-template-columns: 220px 1fr 280px;
+            align-items: center;
+            padding: 0 40px;
+            background: var(--bg-solid);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        
+        .hd-logo {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 46px; color: var(--accent);
+            letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
         .hd-title {
             font-family: 'Orbitron', sans-serif; font-weight: 900;
-            font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff;
+            font-size: 44px; letter-spacing: 4px; text-transform: uppercase; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-align: center;
         }
+
         .hd-right {
-            display: flex; align-items: center; gap: 12px;
-            font-size: 18px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.5px; color: rgba(255,255,255,0.85);
+            display: flex; justify-content: flex-end; align-items: center; gap: 16px;
+            font-size: 26px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--gold);
         }
-        #period-badge { font-size: 18px; }
+        
         #refresh-pill {
-            background: rgba(0,0,0,0.22); border-radius: 20px; padding: 5px 14px;
-            font-family: 'Orbitron', sans-serif; font-size: 13px; letter-spacing: 1px;
-            display: none;
+            position: absolute; top: 125px; right: 40px;
+            background: rgba(0,0,0,0.8); border-radius: 30px; padding: 8px 24px;
+            font-family: 'Orbitron', sans-serif; font-size: 18px; letter-spacing: 1px;
+            display: none; border: 1px solid rgba(255,255,255,0.2); z-index: 20;
         }
 
-        .left {
-            background: var(--surface); display: flex; flex-direction: column;
-            overflow: hidden; flex-shrink: 0;
-        }
-        .tbl-img-wrap { flex-shrink: 0; position: relative; overflow: hidden; background: #0a0a18; }
-        .tbl-img-wrap img { width: 100%; object-fit: cover; display: block; }
-        .tbl-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(5,5,18,0.96) 0%, transparent 100%);
-            padding: 10px 12px 8px;
-        }
-        .tbl-name {
-            font-family: 'Orbitron', sans-serif; font-weight: 900;
-            font-size: 28px; letter-spacing: 1px; text-transform: uppercase; line-height: 1.25; color: #fff;
-        }
-        .tbl-mfr {
-            font-size: 15px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--accent); margin-top: 6px;
-        }
-        .info-block {
-            flex: 1; min-height: 0; padding: 14px 14px;
-            display: flex; flex-direction: column; justify-content: center; gap: 14px;
-        }
-        .info-row { display: flex; flex-direction: column; gap: 2px; }
-        .info-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); }
-        .info-val   { font-size: 17px; font-weight: 700; color: #fff; }
-
-        .right { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-        .lb-col-hd {
-            flex-shrink: 0; height: 34px; display: flex; align-items: center;
-            padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-            color: var(--muted); gap: 10px;
-        }
-        .ch-rank { width: 40px; flex-shrink: 0; }
-        .ch-name { flex: 1; }
-        .ch-score { text-align: right; }
-
-        .lb-list {
-            flex: 1; min-height: 0; overflow: hidden;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(5, auto);
-            grid-auto-flow: column;
-            gap: 8px;
-            padding: 10px 12px;
-            align-content: center;
-        }
-        .lb-list .state-msg { grid-column: 1 / -1; grid-row: 1 / -1; }
-        .lb-row {
-            display: flex; align-items: center;
-            padding: 12px 12px; gap: 10px;
-            background: var(--surface);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        /* MAIN BODY - Contains Wallpaper and Leaderboard */
+        .body-container {
+            flex: 1; min-height: 0;
+            position: relative;
+            display: flex; flex-direction: column;
             overflow: hidden;
         }
-        .lb-row.r1 { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.3); }
-        .lb-row.r2 { background: rgba(148,163,184,0.04); border-color: rgba(148,163,184,0.18); }
-        .lb-row.r3 { background: rgba(176,128,64,0.04); border-color: rgba(176,128,64,0.2); }
+
+        #body-bg {
+            position: absolute;
+            top: -2%; left: -2%;
+            width: 104%; height: 104%;
+            background-size: cover;
+            background-position: center;
+            filter: blur(2px);
+            z-index: 1;
+        }
+
+        #body-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(10, 10, 20, 0.25);
+            z-index: 2;
+        }
+
+        /* LEADERBOARD GRID */
+        .lb-list {
+            position: relative; z-index: 3;
+            flex: 1; min-height: 0; 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(5, 1fr);
+            grid-auto-flow: column;
+            gap: 24px 30px;
+            align-content: stretch;
+            padding: 30px 40px;
+        }
+        
+        .lb-list .state-msg { grid-column: 1 / -1; grid-row: 1 / -1; }
+        
+        /* SCORE BUBBLES */
+        .lb-row {
+            display: flex; align-items: center;
+            padding: 14px 24px;
+            gap: 20px;
+            background: rgba(18, 18, 30, 0.75);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+        }
+        
+        .lb-row.r1 { background: rgba(251,191,36,0.18); border-color: rgba(251,191,36,0.5); }
+        .lb-row.r2 { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.3); }
+        .lb-row.r3 { background: rgba(176,128,64,0.15); border-color: rgba(176,128,64,0.4); }
 
         .rank-num {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 30px;
-            width: 44px; flex-shrink: 0; text-align: center; color: #5a5a78;
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 56px;
+            width: 60px;
+            flex-shrink: 0; text-align: center; color: rgba(255,255,255,0.3);
+            text-shadow: 0 4px 8px rgba(0,0,0,0.6);
         }
-        .r1 .rank-num { color: var(--gold); font-size: 38px; }
+        .r1 .rank-num { color: var(--gold); font-size: 72px; }
         .r2 .rank-num { color: var(--silver); }
         .r3 .rank-num { color: var(--bronze); }
 
         .avatar {
-            flex-shrink: 0; border-radius: 50%; border: 2px solid var(--border);
-            object-fit: cover; background: #1a1a2e;
+            flex-shrink: 0; border-radius: 50%; border: 4px solid rgba(255,255,255,0.15);
+            object-fit: cover; background: #1a1a2e; width: 90px; height: 90px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
-        .r1 .avatar { border-color: var(--gold); }
+        .r1 .avatar { border-color: var(--gold); border-width: 5px;}
         .r2 .avatar { border-color: var(--silver); }
+        .r3 .avatar { border-color: var(--bronze); }
 
         .player-info {
             flex: 1; min-width: 0; display: flex; flex-direction: column;
-            justify-content: center; gap: 3px;
+            justify-content: center; gap: 4px; padding-right: 10px;
         }
+        
         .player-name {
-            font-weight: 700; font-size: 30px; line-height: 1;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+            font-weight: 700; font-size: 42px; line-height: 1.1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8);
         }
-        .r1 .player-name { color: #fff; font-size: 32px; }
+        .r1 .player-name { font-size: 48px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 20px;
-            color: #8888a8; white-space: nowrap; line-height: 1; align-self: flex-end;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 36px;
+            color: #b0b0c8; white-space: nowrap; line-height: 1; align-self: flex-end;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        .r1 .score { color: var(--gold); font-size: 24px; }
-        .r2 .score { color: var(--silver); font-size: 22px; }
-        .r3 .score { color: var(--bronze); font-size: 22px; }
+        .r1 .score { color: var(--gold); font-size: 46px; font-weight: 900; }
+        .r2 .score { color: var(--silver); font-size: 40px; }
+        .r3 .score { color: var(--bronze); font-size: 40px; }
+
+        /* FOOTER - Solid Background */
+        .ft {
+            height: 90px; flex-shrink: 0;
+            display: flex; justify-content: space-around; align-items: center;
+            background: var(--bg-solid);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+
+        .ft-item {
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .ft-label {
+            font-size: 20px; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 3px; color: var(--muted);
+        }
+
+        .ft-val {
+            font-size: 26px; font-weight: 900; color: #fff;
+        }
 
         .state-msg {
             display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 14px; height: 100%;
-            color: var(--muted); font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px;
+            flex-direction: column; gap: 24px; height: 100%;
+            color: #fff; font-size: 28px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 4px;
         }
         .spinner {
-            width: 28px; height: 28px; border: 3px solid var(--border);
+            width: 70px; height: 70px; border: 8px solid rgba(255,255,255,0.1);
             border-top-color: var(--accent); border-radius: 50%;
             animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (orientation: landscape) {
-            .body { display: flex; flex-direction: row; }
-            .left { width: 300px; border-right: 1px solid var(--border); }
-            .tbl-img-wrap img { height: 280px; }
-            .avatar { width: 60px; height: 60px; }
-        }
-        @media (orientation: portrait) {
-            .body { display: flex; flex-direction: column; }
-            .left { flex-direction: row; height: 150px; border-bottom: 1px solid var(--border); }
-            .tbl-img-wrap { width: 200px; flex-shrink: 0; }
-            .tbl-img-wrap img { height: 150px; }
-            .avatar { width: 70px; height: 70px; }
-            .player-name { font-size: 34px; }
-            .r1 .player-name { font-size: 36px; }
-            .score { font-size: 22px; }
-            .r1 .score { font-size: 26px; }
-            .rank-num { font-size: 34px; }
-            .r1 .rank-num { font-size: 42px; }
-        }
     </style>
 </head>
 <body>
+
 <div class="layout">
     <header class="hd">
-        <div class="hd-title">Special When Lit</div>
+        <div class="hd-logo">SWL</div>
+        <div class="hd-title" id="main-header-title">Loading Table...</div>
         <div class="hd-right">
             <span id="period-badge">Loading…</span>
-            <span id="refresh-pill">↻ --:--</span>
         </div>
     </header>
-    <div class="body">
-        <div class="left">
-            <div class="tbl-img-wrap">
-                <img id="tbl-img" src="" alt=""
-                     onerror="this.onerror=null;this.src='https://placehold.co/400x200/0d0d1a/52526a?text=Pinball'">
-                <div class="tbl-overlay">
-                    <div class="tbl-name" id="tbl-name">Loading…</div>
-                    <div class="tbl-mfr"  id="tbl-mfr"></div>
-                </div>
-            </div>
-            <div class="info-block">
-                <div class="info-row"><span class="info-label">Cutoff</span><span class="info-val">Sun 2:00 PM ET</span></div>
-                <div class="info-row"><span class="info-label">Platform</span><span class="info-val">iScored</span></div>
-                <div class="info-row"><span class="info-label">Players</span><span class="info-val" id="player-count">—</span></div>
-                <div class="info-row"><span class="info-label">Updated</span><span class="info-val" id="last-updated">—</span></div>
-            </div>
-        </div>
-        <div class="right">
-            <div class="lb-list" id="lb-list">
-                <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
-            </div>
+    
+    <span id="refresh-pill">↻ --:--</span>
+    
+    <div class="body-container">
+        <div id="body-bg"></div>
+        <div id="body-overlay"></div>
+        <div class="lb-list" id="lb-list">
+            <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
         </div>
     </div>
+
+    <footer class="ft">
+        <div class="ft-item">
+            <span class="ft-label">Platform</span>
+            <span class="ft-val">iScored</span>
+        </div>
+        <div class="ft-item">
+            <span class="ft-label">Cutoff</span>
+            <span class="ft-val">Sun 2:00 PM ET</span>
+        </div>
+        <div class="ft-item">
+            <span class="ft-label">Players</span>
+            <span class="ft-val" id="player-count">—</span>
+        </div>
+        <div class="ft-item">
+            <span class="ft-label">Updated</span>
+            <span class="ft-val" id="last-updated">—</span>
+        </div>
+    </footer>
 </div>
+
 <script>
     const CFG = {
         roomId: '1011', cutoffDay: 0, cutoffHour: 14,
@@ -269,10 +298,9 @@
     }
 
     function renderTable(e, fallback) {
-        const img = e?.b2sFiles?.[0]?.imgUrl || e?.tableFiles?.[0]?.imgUrl || '';
-        if (img) document.getElementById('tbl-img').src = img;
-        document.getElementById('tbl-name').textContent = e ? e.name : (fallback || 'Tournament Table');
-        document.getElementById('tbl-mfr').textContent  = e ? e.manufacturer : 'VPinhub';
+        const img = e?.b2sFiles?.[0]?.imgUrl || e?.tableFiles?.[0]?.imgUrl || 'https://placehold.co/1920x1080/0d0d1a/52526a?text=Pinball';
+        if (img) document.getElementById('body-bg').style.backgroundImage = `url('${img}')`;
+        document.getElementById('main-header-title').textContent = e ? e.name : (fallback || 'Tournament Table');
     }
 
     function renderBoard(players) {
@@ -281,14 +309,14 @@
             return;
         }
         const rows = Math.min(Math.ceil(players.length / 2), 5);
-        document.getElementById('lb-list').style.gridTemplateRows = `repeat(${rows}, auto)`;
+        document.getElementById('lb-list').style.gridTemplateRows = `repeat(${rows}, 1fr)`;
         const cls = i => i===0?'r1':i===1?'r2':i===2?'r3':'';
         document.getElementById('lb-list').innerHTML = players.map((p,i) => `
             <div class="lb-row ${cls(i)}">
                 <span class="rank-num">${i+1}</span>
                 <img class="avatar"
                      src="${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g,'_')}.gif"
-                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=40&bold=true'"
+                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=100&bold=true'"
                      alt="">
                 <div class="player-info">
                     <span class="player-name">${p.name}</span>

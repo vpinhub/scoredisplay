@@ -10,262 +10,247 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg:      #060610;
-            --surface: #0d0d1a;
-            --border:  rgba(255,255,255,0.06);
-            --text:    #e4e4f0;
-            --muted:   #52526a;
+            --bg-solid: #080812;
             --gold:    #fbbf24;
             --silver:  #94a3b8;
             --bronze:  #b08040;
+            --text:    #ffffff;
+            --muted:   #a0a0b8;
+            --accent:  #6366f1; /* overridden by JS */
         }
 
         html, body {
             width: 100%; height: 100%;
             overflow: hidden;
-            background: var(--bg);
+            background: #000;
             color: var(--text);
             font-family: 'Encode Sans', sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── LAYOUT ── */
-        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-        /* ── HEADER ── */
-        .hd {
-            height: 52px; flex-shrink: 0; position: relative;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px;
-            background: #6366f1; /* updated by JS */
-            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
-            transition: background 0.4s;
+        .layout { 
+            display: flex; flex-direction: column; 
+            height: 100vh; overflow: hidden; 
         }
-        .hd-left { display: flex; flex-direction: column; gap: 2px; }
+
+        /* HEADER */
+        .hd {
+            height: 110px; flex-shrink: 0; position: relative;
+            display: grid; grid-template-columns: 220px 1fr 280px;
+            align-items: center; padding: 0 40px;
+            background: var(--bg-solid);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8); z-index: 10;
+        }
+        
+        .hd-logo {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 46px; color: var(--accent);
+            letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: color 0.4s;
+        }
+
         .hd-title {
             font-family: 'Orbitron', sans-serif; font-weight: 900;
-            font-size: 15px; letter-spacing: 2px; text-transform: uppercase;
-            color: #fff; line-height: 1;
+            font-size: 44px; letter-spacing: 4px; text-transform: uppercase; color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
         }
+
+        .hd-right {
+            display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+            gap: 6px;
+        }
+        
         .hd-mode {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; color: rgba(255,255,255,0.6);
+            font-size: 22px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: rgba(255,255,255,0.8);
         }
-        .hd-dots { display: flex; gap: 8px; align-items: center; }
+
+        .hd-dots { display: flex; gap: 10px; }
         .dot {
-            width: 9px; height: 9px; border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 12px; height: 12px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3);
             transition: all 0.35s;
         }
-        .dot.active { background: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.92); }
+        .dot.active { background: var(--accent); border-color: var(--accent); }
 
-        /* progress bar — hidden unless ?timer */
         .progress-bar {
             position: absolute; bottom: 0; left: 0;
-            height: 3px; background: rgba(255,255,255,0.38);
-            width: 100%; display: none; pointer-events: none;
+            height: 4px; background: var(--accent);
+            width: 100%; display: none; pointer-events: none; transition: background 0.4s;
         }
 
-        /* ── BODY (fades between comps) ── */
-        .body { flex: 1; min-height: 0; overflow: hidden; }
+        /* MAIN BODY */
+        .body-container {
+            flex: 1; min-height: 0; position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: opacity 0.45s;
+        }
 
-        /* ── LEFT PANEL ── */
-        .left {
-            background: var(--surface); display: flex;
-            flex-direction: column; overflow: hidden; flex-shrink: 0;
+        #body-bg {
+            position: absolute; top: -2%; left: -2%;
+            width: 104%; height: 104%;
+            background-size: cover; background-position: center;
+            filter: blur(2px); z-index: 1;
         }
-        .tbl-img-wrap { flex-shrink: 0; position: relative; overflow: hidden; background: #0a0a18; }
-        .tbl-img-wrap img { width: 100%; object-fit: cover; display: block; }
-        .tbl-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(5,5,18,0.96) 0%, transparent 100%);
-            padding: 10px 12px 8px;
-        }
-        .tbl-name {
-            font-family: 'Orbitron', sans-serif; font-weight: 900;
-            font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-            line-height: 1.3; color: #fff;
-        }
-        .tbl-mfr {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; margin-top: 2px; transition: color 0.4s;
-        }
-        .info-block {
-            flex: 1; min-height: 0; padding: 10px 14px;
-            display: flex; flex-direction: column; justify-content: center; gap: 9px;
-        }
-        .info-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .info-label { color: var(--muted); }
-        .info-val   { color: var(--text); }
 
-        /* ── RIGHT PANEL ── */
-        .right { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-        .lb-col-hd {
-            flex-shrink: 0; height: 34px; display: flex; align-items: center;
-            padding: 0 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-            color: var(--muted); gap: 10px;
+        #body-overlay {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(10, 10, 20, 0.25); z-index: 2;
         }
-        .ch-rank { width: 40px; flex-shrink: 0; }
-        .ch-av   { width: 44px; flex-shrink: 0; }
-        .ch-name { flex: 1; }
-        .ch-score { text-align: right; }
 
-        /* ── LEADERBOARD ── */
-        /* lb-viewport clips the scrolling list */
-        .lb-viewport { flex: 1; min-height: 0; overflow: hidden; }
+        /* LEADERBOARD VIEWPORT & LIST */
+        .lb-viewport {
+            flex: 1; min-height: 0; overflow: hidden;
+            position: relative; z-index: 3; padding: 30px 40px;
+        }
 
         .lb-list { display: flex; flex-direction: column; width: 100%; }
 
-        /* top-10: rows share the space equally */
-        .lb-list.mode-top10       { height: 100%; }
-        .lb-list.mode-top10 .lb-row { flex: 1; min-height: 0; }
-
-        /* scroll: rows are fixed height — list extends beyond viewport */
-        .lb-list.mode-scroll .lb-row { flex: none; }
+        /* Top 10 Mode: Grid Layout */
+        .lb-list.mode-top10 {
+            display: grid; height: 100%;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: repeat(5, 1fr);
+            grid-auto-flow: column; gap: 24px 30px;
+        }
+        
+        /* Scroll Mode: Stack Layout */
+        .lb-list.mode-scroll { gap: 20px; }
+        .lb-list.mode-scroll .lb-row {
+            /* Fix row height so calculation works perfectly on Nexus 7 */
+            height: 125px; flex: none; 
+        }
 
         .lb-row {
-            display: flex; align-items: center;
-            padding: 0 14px; gap: 10px;
-            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 14px 24px; gap: 20px;
+            background: rgba(18, 18, 30, 0.75); border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); backdrop-filter: blur(12px);
         }
-        .lb-row:last-child { border-bottom: none; }
-        .lb-row.r1 { background: rgba(251,191,36,0.05); }
-        .lb-row.r2 { background: rgba(148,163,184,0.02); }
-        .lb-row.r3 { background: rgba(176,128,64,0.02); }
+        .lb-row.r1 { background: rgba(251,191,36,0.18); border-color: rgba(251,191,36,0.5); }
+        .lb-row.r2 { background: rgba(148,163,184,0.15); border-color: rgba(148,163,184,0.3); }
+        .lb-row.r3 { background: rgba(176,128,64,0.15); border-color: rgba(176,128,64,0.4); }
 
         .rank-num {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 26px;
-            width: 40px; flex-shrink: 0; text-align: center; color: #44445a;
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 56px;
+            width: 60px; flex-shrink: 0; text-align: center; color: rgba(255,255,255,0.3);
+            text-shadow: 0 4px 8px rgba(0,0,0,0.6);
         }
-        .r1 .rank-num { color: var(--gold); font-size: 30px; }
+        .r1 .rank-num { color: var(--gold); font-size: 72px; }
         .r2 .rank-num { color: var(--silver); }
         .r3 .rank-num { color: var(--bronze); }
 
         .avatar {
-            flex-shrink: 0; border-radius: 50%;
-            border: 2px solid var(--border); object-fit: cover; background: #1a1a2e;
+            flex-shrink: 0; border-radius: 50%; border: 4px solid rgba(255,255,255,0.15);
+            object-fit: cover; background: #1a1a2e; width: 90px; height: 90px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
-        .r1 .avatar { border-color: var(--gold); }
+        .r1 .avatar { border-color: var(--gold); border-width: 5px;}
         .r2 .avatar { border-color: var(--silver); }
+        .r3 .avatar { border-color: var(--bronze); }
 
         .player-info {
             flex: 1; min-width: 0; display: flex; flex-direction: column;
-            justify-content: center; gap: 3px;
+            justify-content: center; gap: 4px; padding-right: 10px;
         }
+        
         .player-name {
-            font-weight: 700; font-size: 26px; line-height: 1;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+            font-weight: 700; font-size: 42px; line-height: 1.1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8);
         }
-        .r1 .player-name { color: #fff; font-size: 28px; }
+        .r1 .player-name { font-size: 48px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 17px;
-            color: #8888a8; white-space: nowrap; line-height: 1;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 36px;
+            color: #b0b0c8; white-space: nowrap; line-height: 1; align-self: flex-end;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        .r1 .score { color: var(--gold); font-size: 20px; }
-        .r2 .score { color: var(--silver); font-size: 18px; }
-        .r3 .score { color: var(--bronze); font-size: 18px; }
+        .r1 .score { color: var(--gold); font-size: 46px; font-weight: 900; }
+        .r2 .score { color: var(--silver); font-size: 40px; }
+        .r3 .score { color: var(--bronze); font-size: 40px; }
 
-        /* ── STATE MESSAGES ── */
+        /* FOOTER */
+        .ft {
+            height: 90px; flex-shrink: 0;
+            display: flex; justify-content: space-around; align-items: center;
+            background: var(--bg-solid);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.8); z-index: 10;
+        }
+
+        .ft-item { display: flex; align-items: center; gap: 12px; }
+        .ft-label {
+            font-size: 20px; font-weight: 700; text-transform: uppercase; 
+            letter-spacing: 3px; color: var(--muted);
+        }
+        .ft-val { font-size: 26px; font-weight: 900; color: #fff; }
+
         .state-msg {
             display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 14px; height: 100%;
-            color: var(--muted); font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px;
+            flex-direction: column; gap: 24px; height: 100%;
+            color: #fff; font-size: 28px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 4px;
         }
         .spinner {
-            width: 28px; height: 28px; border: 3px solid var(--border);
-            border-top-color: currentColor; border-radius: 50%;
+            width: 70px; height: 70px; border: 8px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent); border-radius: 50%;
             animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ── LANDSCAPE ── */
-        @media (orientation: landscape) {
-            .body { display: flex; flex-direction: row; }
-            .left { width: 252px; border-right: 1px solid var(--border); }
-            .tbl-img-wrap img { height: 186px; }
-            .avatar { width: 44px; height: 44px; }
-            /* scroll rows match top-10 row height exactly */
-            .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 34px) / 10); }
-        }
-
-        /* ── PORTRAIT ── */
-        @media (orientation: portrait) {
-            .body { display: flex; flex-direction: column; }
-            .left { flex-direction: row; height: 128px; border-bottom: 1px solid var(--border); }
-            .tbl-img-wrap { width: 170px; flex-shrink: 0; }
-            .tbl-img-wrap img { height: 128px; }
-            .avatar { width: 50px; height: 50px; }
-            .player-name { font-size: 28px; }
-            .r1 .player-name { font-size: 30px; }
-            .score { font-size: 18px; }
-            .r1 .score { font-size: 22px; }
-            .rank-num { font-size: 32px; }
-            .r1 .rank-num { font-size: 40px; }
-            .lb-list.mode-scroll .lb-row { height: calc((100vh - 52px - 128px - 34px) / 10); }
-        }
     </style>
 </head>
 <body>
 <div class="layout">
 
-    <header class="hd" id="hd">
-        <div class="hd-left">
-            <div class="hd-title" id="hd-title">VPinhub</div>
-            <div class="hd-mode"  id="hd-mode">Loading…</div>
-        </div>
-        <div class="hd-dots">
-            <span class="dot" id="dot-cc"></span>
-            <span class="dot" id="dot-swl"></span>
-            <span class="dot" id="dot-ttd"></span>
+    <header class="hd">
+        <div class="hd-logo" id="hd-logo">VPC</div>
+        <div class="hd-title" id="hd-title">Loading...</div>
+        <div class="hd-right">
+            <div class="hd-mode" id="hd-mode">Loading…</div>
+            <div class="hd-dots">
+                <span class="dot" id="dot-cc"></span>
+                <span class="dot" id="dot-swl"></span>
+                <span class="dot" id="dot-ttd"></span>
+            </div>
         </div>
         <div class="progress-bar" id="progress-bar"></div>
     </header>
 
-    <div class="body" id="body">
-
-        <div class="left">
-            <div class="tbl-img-wrap">
-                <img id="tbl-img" src="" alt=""
-                     onerror="this.onerror=null;this.src='https://placehold.co/400x200/0d0d1a/52526a?text=Pinball'">
-                <div class="tbl-overlay">
-                    <div class="tbl-name" id="tbl-name">—</div>
-                    <div class="tbl-mfr"  id="tbl-mfr"></div>
-                </div>
-            </div>
-            <div class="info-block">
-                <div class="info-row"><span class="info-label">Cutoff</span>  <span class="info-val" id="info-cutoff">—</span></div>
-                <div class="info-row"><span class="info-label">Platform</span><span class="info-val" id="info-platform">—</span></div>
-                <div class="info-row"><span class="info-label">Players</span> <span class="info-val" id="info-players">—</span></div>
+    <div class="body-container" id="body-container">
+        <div id="body-bg"></div>
+        <div id="body-overlay"></div>
+        
+        <div class="lb-viewport" id="lb-viewport">
+            <div class="lb-list mode-top10" id="lb-list">
+                <div class="state-msg"><div class="spinner"></div><span>Loading scores</span></div>
             </div>
         </div>
-
-        <div class="right">
-            <div class="lb-col-hd">
-                <span class="ch-rank">#</span>
-                <span class="ch-av"></span>
-                <span class="ch-name">Player · Score</span>
-            </div>
-            <div class="lb-viewport" id="lb-viewport">
-                <div class="lb-list mode-top10" id="lb-list">
-                    <div class="state-msg"><div class="spinner"></div><span>Loading scores</span></div>
-                </div>
-            </div>
-        </div>
-
     </div>
+
+    <footer class="ft">
+        <div class="ft-item">
+            <span class="ft-label">Platform</span>
+            <span class="ft-val" id="info-platform">—</span>
+        </div>
+        <div class="ft-item">
+            <span class="ft-label">Cutoff</span>
+            <span class="ft-val" id="info-cutoff">—</span>
+        </div>
+        <div class="ft-item">
+            <span class="ft-label">Players</span>
+            <span class="ft-val" id="info-players">—</span>
+        </div>
+    </footer>
+
 </div>
 
 <script>
     // ── CONFIG ──────────────────────────────────────────────
     const TOP10_MS     = 60_000;   // ms to show top 10 before scrolling
-    const SCROLL_SPEED = 15;       // px per second during scroll
+    const SCROLL_SPEED = 20;       // px per second during scroll
     const SCROLL_PAUSE = 2_500;    // ms to hold at end of scroll before next comp
     const FADE_MS      = 450;      // ms for cross-comp fade transition
     const SHOW_TIMER   = new URLSearchParams(window.location.search).has('timer');
@@ -276,11 +261,11 @@
     const COMPS = ['cc', 'swl', 'ttd'];
 
     const CFG = {
-        cc:  { label: 'Competition Corner', accent: '#6366f1', cutoff: 'Mon 12:00 AM PT', platform: 'VPC Discord',
+        cc:  { id: 'VPC', accent: '#6366f1', cutoff: 'Mon 12:00 AM PT', platform: 'Competition Corner',
                url: 'https://virtualpinballchat.com/vpc/api/v1/currentWeek?channelName=competition-corner' },
-        swl: { label: 'Special When Lit',   accent: '#d946ef', cutoff: 'Sun 2:00 PM ET',  platform: 'iScored',
+        swl: { id: 'SWL', accent: '#d946ef', cutoff: 'Sun 2:00 PM ET',  platform: 'iScored',
                url: 'https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=1011' },
-        ttd: { label: 'Thursday Throwdown', accent: '#f97316', cutoff: 'Thu 2:00 PM ET',  platform: 'iScored',
+        ttd: { id: 'TTD', accent: '#f97316', cutoff: 'Thu 2:00 PM ET',  platform: 'iScored',
                url: 'https://virtualpinballchat.com/vpc/api/v1/iscored?roomId=700' }
     };
 
@@ -288,15 +273,14 @@
     let compIdx  = 0;          // index into COMPS
     let phase    = 'top10';    // 'top10' | 'scroll'
     let vpsDB    = [];
-    let allData  = {};         // { cc: {...}, swl: {...}, ttd: {...} }
-    let cycleGen = 0;          // incremented on each advance to cancel stale callbacks
+    let allData  = {};         
+    let cycleGen = 0;          
     let phaseTimer = null;
 
     // ── BOOT ─────────────────────────────────────────────────
     async function boot() {
         if (SHOW_TIMER) document.getElementById('progress-bar').style.display = 'block';
 
-        // Fetch VPS DB and all comp data concurrently
         const [vps] = await Promise.allSettled([
             fetch(VPS_URL).then(r => r.json()),
             fetchAll()
@@ -327,13 +311,10 @@
             .sort((a, b) => b.score - a.score)
             .map(p => ({ name: p.username, high: p.score, avatar: p.userAvatarUrl || null }));
 
-        const vpsEntry = vpsDB.find(t =>
-            (t.tableFiles || []).some(f => f.id === weekData.vpsId)
-        );
+        const vpsEntry = vpsDB.find(t => (t.tableFiles || []).some(f => f.id === weekData.vpsId));
         return {
             players,
             tableName: vpsEntry ? vpsEntry.name : (weekData.table || '—'),
-            mfr:       vpsEntry ? vpsEntry.manufacturer : 'VPC Competition',
             img:       vpsEntry?.b2sFiles?.[0]?.imgUrl || vpsEntry?.tableFiles?.[0]?.imgUrl || ''
         };
     }
@@ -355,7 +336,6 @@
         return {
             players,
             tableName: vpsEntry ? vpsEntry.name : (game.longName || '—'),
-            mfr:       vpsEntry ? vpsEntry.manufacturer : 'VPinhub',
             img:       vpsEntry?.b2sFiles?.[0]?.imgUrl || vpsEntry?.tableFiles?.[0]?.imgUrl || ''
         };
     }
@@ -372,33 +352,27 @@
         const cfg  = CFG[comp];
         const d    = allData[comp];
 
-        // Header
-        document.getElementById('hd').style.background    = cfg.accent;
-        document.getElementById('hd-title').textContent   = cfg.label;
+        document.documentElement.style.setProperty('--accent', cfg.accent);
+        document.getElementById('hd-logo').textContent    = cfg.id;
+        document.getElementById('hd-title').textContent   = d ? d.tableName : 'Loading...';
         document.getElementById('hd-mode').textContent    = phase === 'top10' ? 'Top 10' : 'All Scores';
 
-        // Dots
-        COMPS.forEach((c, i) =>
-            document.getElementById('dot-' + c).classList.toggle('active', i === compIdx)
-        );
+        COMPS.forEach((c, i) => document.getElementById('dot-' + c).classList.toggle('active', i === compIdx));
 
-        // Left panel
         document.getElementById('info-cutoff').textContent   = cfg.cutoff;
         document.getElementById('info-platform').textContent = cfg.platform;
-        document.getElementById('tbl-mfr').style.color       = cfg.accent;
 
         if (!d) {
             document.getElementById('info-players').textContent = '—';
-            document.getElementById('lb-list').innerHTML =
-                '<div class="state-msg"><span>⚠ No data available</span></div>';
+            document.getElementById('lb-list').innerHTML = '<div class="state-msg"><span>⚠ No data available</span></div>';
             phaseTimer = setTimeout(advance, 10_000);
             return;
         }
 
         document.getElementById('info-players').textContent = d.players.length;
-        document.getElementById('tbl-img').src  = d.img || 'https://placehold.co/400x200/0d0d1a/52526a?text=Pinball';
-        document.getElementById('tbl-name').textContent = d.tableName;
-        document.getElementById('tbl-mfr').textContent  = d.mfr;
+        
+        const img = d.img || 'https://placehold.co/1920x1080/0d0d1a/52526a?text=Pinball';
+        document.getElementById('body-bg').style.backgroundImage = `url('${img}')`;
 
         if (phase === 'top10') doTop10(d.players);
         else                   doScroll(d.players);
@@ -411,14 +385,13 @@
         listEl.style.transform  = '';
         listEl.classList.replace('mode-scroll', 'mode-top10');
 
-        renderRows(players.slice(0, 10));
+        renderRows(players.slice(0, 10), COMPS[compIdx]);
 
-        // Animate progress bar across the 60s window
         if (SHOW_TIMER) {
             const bar = document.getElementById('progress-bar');
             bar.style.transition = 'none';
             bar.style.width      = '100%';
-            bar.offsetWidth;    // force reflow so transition fires
+            bar.offsetWidth;    
             bar.style.transition = `width ${TOP10_MS / 1000}s linear`;
             bar.style.width      = '0%';
         }
@@ -452,18 +425,16 @@
         listEl.style.transform  = '';
         listEl.classList.replace('mode-top10', 'mode-scroll');
 
-        renderRows(players);
+        renderRows(players, COMPS[compIdx]);
 
-        // Read heights after browser layout
         requestAnimationFrame(() => requestAnimationFrame(() => {
-            if (cycleGen !== myGen) return; // superseded
+            if (cycleGen !== myGen) return; 
 
             const viewH      = viewportEl.clientHeight;
             const listH      = listEl.scrollHeight;
             const scrollDist = Math.max(0, listH - viewH);
 
             if (scrollDist <= 0) {
-                // All players already visible — hold then advance
                 phaseTimer = setTimeout(advance, SCROLL_PAUSE);
                 return;
             }
@@ -480,47 +451,44 @@
     }
 
     // ── ADVANCE ──────────────────────────────────────────────
-    // Called when a phase ends. Fades body, moves to next comp/phase, fades back in.
     function advance() {
         cycleGen++;
         clearTimeout(phaseTimer);
 
-        const bodyEl = document.getElementById('body');
-        bodyEl.style.transition = `opacity ${FADE_MS}ms`;
-        bodyEl.style.opacity    = '0';
+        const bodyEl = document.getElementById('body-container');
+        bodyEl.style.opacity = '0';
 
         setTimeout(() => {
-            // Reset scroll
             const listEl = document.getElementById('lb-list');
             listEl.style.transition = 'none';
             listEl.style.transform  = '';
 
-            // Next state
             compIdx = (compIdx + 1) % COMPS.length;
             phase   = 'top10';
 
-            // Refresh all data once per full loop
             if (compIdx === 0) fetchAll();
 
             showComp();
 
-            bodyEl.style.transition = `opacity ${FADE_MS}ms`;
-            bodyEl.style.opacity    = '1';
+            bodyEl.style.opacity = '1';
         }, FADE_MS);
     }
 
     // ── ROW RENDERING ────────────────────────────────────────
-    function renderRows(players) {
+    function renderRows(players, compType) {
         if (!players.length) {
-            document.getElementById('lb-list').innerHTML =
-                '<div class="state-msg"><span>No scores yet</span></div>';
+            document.getElementById('lb-list').innerHTML = '<div class="state-msg"><span>No scores yet</span></div>';
             return;
         }
         const cls = i => i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
         document.getElementById('lb-list').innerHTML = players.map((p, i) => {
-            const src = p.avatar ||
-                (AVATAR_BASE + p.name.toLowerCase().replace(/\s+/g, '_') + '.gif');
-            const fb  = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=40&bold=true`;
+            let src = p.avatar;
+            if (!src) {
+                src = compType === 'cc' ? 
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=100&bold=true` :
+                    `${AVATAR_BASE}${p.name.toLowerCase().replace(/\s+/g, '_')}.gif`;
+            }
+            const fb = `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=1a1a2e&color=aaa&size=100&bold=true`;
             return `
             <div class="lb-row ${cls(i)}">
                 <span class="rank-num">${i + 1}</span>
