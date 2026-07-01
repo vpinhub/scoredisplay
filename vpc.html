@@ -12,13 +12,11 @@
         :root {
             --accent:  #6366f1;
             --bg:      #060610;
-            --surface: #0d0d1a;
-            --border:  rgba(255,255,255,0.08);
-            --text:    #e4e4f0;
-            --muted:   #52526a;
             --gold:    #fbbf24;
             --silver:  #94a3b8;
             --bronze:  #b08040;
+            --text:    #ffffff;
+            --muted:   #a0a0b8;
         }
 
         html, body {
@@ -30,199 +28,189 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        .body   { flex: 1; min-height: 0; overflow: hidden; }
-
-        /* HEADER SCALING */
-        .hd {
-            height: 120px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 40px;
-            background: var(--accent);
-            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+        /* DYNAMIC BACKGROUND SETTINGS */
+        #bg-image {
+            position: absolute;
+            top: -5%; left: -5%;
+            width: 110%; height: 110%; /* Oversized to prevent blur edge bleeding */
+            background-size: cover;
+            background-position: center;
+            filter: blur(12px);
+            z-index: -2;
         }
+        
+        /* OVERLAY TO ENSURE TEXT READABILITY */
+        #bg-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(6, 6, 16, 0.7) 0%, rgba(6, 6, 16, 0.9) 100%);
+            z-index: -1;
+        }
+
+        .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; z-index: 1; }
+        .body   { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 20px 40px; }
+
+        /* UNIFIED HEADER */
+        .hd {
+            height: 110px; flex-shrink: 0;
+            display: grid;
+            grid-template-columns: 200px 1fr 250px; /* VPC | Title | Dates */
+            align-items: center;
+            padding: 0 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .hd-logo {
+            font-family: 'Orbitron', sans-serif; font-weight: 900;
+            font-size: 42px; color: var(--accent);
+            letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+
         .hd-title {
             font-family: 'Orbitron', sans-serif; font-weight: 900;
             font-size: 44px; letter-spacing: 4px; text-transform: uppercase; color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            padding-right: 20px; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-align: center; text-shadow: 0 4px 10px rgba(0,0,0,0.8);
         }
+
         .hd-right {
-            display: flex; align-items: center; gap: 16px;
-            font-size: 24px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1px; color: rgba(255,255,255,0.9);
+            display: flex; justify-content: flex-end; align-items: center; gap: 16px;
+            font-size: 26px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1px; color: var(--gold); text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         }
-        #period-badge { font-size: 24px; }
-        #refresh-pill {
-            background: rgba(0,0,0,0.25); border-radius: 30px; padding: 8px 20px;
-            font-family: 'Orbitron', sans-serif; font-size: 18px; letter-spacing: 1px;
-            display: none;
-        }
-
-        /* LEFT COLUMN SCALING */
-        .left {
-            background: var(--surface); display: flex; flex-direction: column;
-            overflow: hidden; flex-shrink: 0;
-        }
-        .tbl-img-wrap { flex-shrink: 0; position: relative; overflow: hidden; background: #0a0a18; }
-        .tbl-img-wrap img { width: 100%; object-fit: cover; display: block; }
-        .tbl-overlay {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(5,5,18,0.96) 0%, transparent 100%);
-            padding: 16px 24px 12px;
-        }
-        .tbl-name {
-            font-family: 'Orbitron', sans-serif; font-weight: 900;
-            font-size: 36px; letter-spacing: 1px; text-transform: uppercase; line-height: 1.25; color: #fff;
-        }
-        .tbl-mfr {
-            font-size: 18px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 3px; color: var(--accent); margin-top: 8px;
-        }
-        .info-block {
-            flex: 1; min-height: 0; padding: 32px 32px;
-            display: flex; flex-direction: column; justify-content: flex-start; gap: 28px;
-            margin-top: 10px;
-        }
-        .info-row { display: flex; flex-direction: column; gap: 6px; }
-        .info-label { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--muted); }
-        .info-val   { font-size: 28px; font-weight: 700; color: #fff; }
-
-        /* RIGHT COLUMN (LEADERBOARD) SCALING */
-        .right { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
         
+        #refresh-pill {
+            position: absolute; top: 120px; right: 40px;
+            background: rgba(0,0,0,0.5); border-radius: 30px; padding: 8px 20px;
+            font-family: 'Orbitron', sans-serif; font-size: 16px; letter-spacing: 1px;
+            display: none; border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* WIDE LEADERBOARD SCALING */
         .lb-list {
             flex: 1; min-height: 0; overflow: hidden;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: repeat(5, auto);
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            grid-template-rows: repeat(5, 1fr);
             grid-auto-flow: column;
-            gap: 24px;
-            padding: 32px;
-            align-content: center;
+            gap: 20px 40px; /* Vertical / Horizontal gap */
+            align-content: stretch;
+            padding-bottom: 20px;
         }
+        
         .lb-list .state-msg { grid-column: 1 / -1; grid-row: 1 / -1; }
         
         .lb-row {
             display: flex; align-items: center;
-            padding: 24px 28px; gap: 20px;
-            background: var(--surface);
-            border-radius: 20px;
-            border: 2px solid var(--border);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-            overflow: hidden;
+            padding: 12px 24px; gap: 24px;
+            background: rgba(13, 13, 26, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            backdrop-filter: blur(5px);
         }
-        .lb-row.r1 { background: rgba(251,191,36,0.07); border-color: rgba(251,191,36,0.4); }
-        .lb-row.r2 { background: rgba(148,163,184,0.04); border-color: rgba(148,163,184,0.25); }
-        .lb-row.r3 { background: rgba(176,128,64,0.04); border-color: rgba(176,128,64,0.3); }
+        
+        .lb-row.r1 { background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.5); }
+        .lb-row.r2 { background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.3); }
+        .lb-row.r3 { background: rgba(176,128,64,0.1); border-color: rgba(176,128,64,0.4); }
 
         .rank-num {
-            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 48px;
-            width: 60px; flex-shrink: 0; text-align: center; color: #5a5a78;
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 52px;
+            width: 65px; flex-shrink: 0; text-align: center; color: rgba(255,255,255,0.3);
+            text-shadow: 0 4px 8px rgba(0,0,0,0.6);
         }
-        .r1 .rank-num { color: var(--gold); font-size: 64px; }
+        .r1 .rank-num { color: var(--gold); font-size: 68px; }
         .r2 .rank-num { color: var(--silver); }
         .r3 .rank-num { color: var(--bronze); }
 
         .avatar {
-            flex-shrink: 0; border-radius: 50%; border: 4px solid var(--border);
-            object-fit: cover; background: #1a1a2e;
+            flex-shrink: 0; border-radius: 50%; border: 4px solid rgba(255,255,255,0.1);
+            object-fit: cover; background: #1a1a2e; width: 90px; height: 90px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .r1 .avatar { border-color: var(--gold); }
         .r2 .avatar { border-color: var(--silver); }
+        .r3 .avatar { border-color: var(--bronze); }
 
         .player-info {
             flex: 1; min-width: 0; display: flex; flex-direction: column;
-            justify-content: center; gap: 6px;
+            justify-content: center; gap: 4px;
         }
+        
         .player-name {
-            font-weight: 700; font-size: 38px; line-height: 1;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text);
+            font-weight: 700; font-size: 40px; line-height: 1.1;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        .r1 .player-name { color: #fff; font-size: 46px; }
+        .r1 .player-name { font-size: 48px; }
 
         .score {
-            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 32px;
-            color: #8888a8; white-space: nowrap; line-height: 1; align-self: flex-end;
+            font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 36px;
+            color: #b0b0c8; white-space: nowrap; line-height: 1; align-self: flex-end;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        .r1 .score { color: var(--gold); font-size: 40px; font-weight: 900; }
-        .r2 .score { color: var(--silver); font-size: 36px; }
-        .r3 .score { color: var(--bronze); font-size: 36px; }
+        .r1 .score { color: var(--gold); font-size: 44px; font-weight: 900; }
+        .r2 .score { color: var(--silver); font-size: 40px; }
+        .r3 .score { color: var(--bronze); font-size: 40px; }
+
+        /* FOOTER INFO BAR */
+        .footer-info {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted); font-size: 18px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .footer-info span strong { color: #fff; margin-left: 8px; font-size: 20px; }
 
         .state-msg {
             display: flex; align-items: center; justify-content: center;
             flex-direction: column; gap: 20px; height: 100%;
-            color: var(--muted); font-size: 18px; font-weight: 700;
+            color: #fff; font-size: 24px; font-weight: 700;
             text-transform: uppercase; letter-spacing: 3px;
         }
         .spinner {
-            width: 48px; height: 48px; border: 5px solid var(--border);
+            width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.1);
             border-top-color: var(--accent); border-radius: 50%;
             animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* RESPONSIVE MEDIA QUERIES FOR LANDSCAPE */
-        @media (orientation: landscape) {
-            .body { display: flex; flex-direction: row; }
-            .left { width: 420px; border-right: 2px solid var(--border); }
-            .tbl-img-wrap img { height: 420px; }
-            .avatar { width: 90px; height: 90px; }
-        }
-        
-        /* RESPONSIVE MEDIA QUERIES FOR PORTRAIT (If the tablet is rotated) */
-        @media (orientation: portrait) {
-            .body { display: flex; flex-direction: column; }
-            .left { flex-direction: row; height: 220px; border-bottom: 2px solid var(--border); width: 100%; }
-            .tbl-img-wrap { width: 300px; flex-shrink: 0; }
-            .tbl-img-wrap img { height: 220px; }
-            .info-block { flex-direction: row; flex-wrap: wrap; align-content: center; padding: 20px; gap: 20px; }
-            .avatar { width: 100px; height: 100px; }
-            .player-name { font-size: 44px; }
-            .r1 .player-name { font-size: 52px; }
-            .score { font-size: 38px; }
-            .r1 .score { font-size: 46px; }
-            .rank-num { font-size: 56px; width: 80px; }
-            .r1 .rank-num { font-size: 72px; }
-            .lb-list { grid-template-columns: 1fr; grid-auto-flow: row; overflow-y: auto; }
-        }
     </style>
 </head>
 <body>
+
+<!-- Dynamic Background Elements -->
+<div id="bg-image"></div>
+<div id="bg-overlay"></div>
+
 <div class="layout">
     <header class="hd">
+        <div class="hd-logo">VPC</div>
         <div class="hd-title" id="main-header-title">Loading Table...</div>
         <div class="hd-right">
             <span id="period-badge">Loading…</span>
-            <span id="refresh-pill">↻ --:--</span>
         </div>
     </header>
+    
+    <span id="refresh-pill">↻ --:--</span>
+    
     <div class="body">
-        <div class="left">
-            <div class="tbl-img-wrap">
-                <img id="tbl-img" src="" alt=""
-                     onerror="this.onerror=null;this.src='https://placehold.co/600x600/0d0d1a/52526a?text=Pinball'">
-                <div class="tbl-overlay">
-                    <div class="tbl-name" id="tbl-name">Loading…</div>
-                    <div class="tbl-mfr"  id="tbl-mfr"></div>
-                </div>
-            </div>
-            <div class="info-block">
-                <div class="info-row"><span class="info-label">Cutoff</span><span class="info-val">Mon 12:00 AM PT</span></div>
-                <div class="info-row"><span class="info-label">Platform</span><span class="info-val">VPC Discord</span></div>
-                <div class="info-row"><span class="info-label">Players</span><span class="info-val" id="player-count">—</span></div>
-                <div class="info-row"><span class="info-label">Updated</span><span class="info-val" id="last-updated">—</span></div>
-            </div>
+        <div class="lb-list" id="lb-list">
+            <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
         </div>
-        <div class="right">
-            <div class="lb-list" id="lb-list">
-                <div class="state-msg"><div class="spinner"></div><span>Fetching Scores</span></div>
-            </div>
+        
+        <div class="footer-info">
+            <span>Platform <strong>VPC Discord</strong></span>
+            <span>Cutoff <strong>Mon 12:00 AM PT</strong></span>
+            <span>Players <strong id="player-count">—</strong></span>
+            <span>Updated <strong id="last-updated">—</strong></span>
         </div>
     </div>
 </div>
+
 <script>
     const CFG = {
         cutoffDay: 1, cutoffHour: 0,
@@ -266,21 +254,16 @@
     }
 
     function renderTable(entry, fallbackName, version) {
-        const img = entry?.b2sFiles?.[0]?.imgUrl || entry?.tableFiles?.[0]?.imgUrl || '';
-        if (img) document.getElementById('tbl-img').src = img;
+        // Find the best quality image available
+        const img = entry?.b2sFiles?.[0]?.imgUrl || entry?.tableFiles?.[0]?.imgUrl || 'https://placehold.co/1920x1080/0d0d1a/52526a?text=Pinball';
         
-        // Define the table name
-        const tableName = entry ? entry.name : (fallbackName || 'Tournament Table');
+        // Apply image to full background
+        if (img) {
+            document.getElementById('bg-image').style.backgroundImage = `url('${img}')`;
+        }
         
         // Push the table name to the top main header
-        document.getElementById('main-header-title').textContent = tableName;
-        
-        // Hide the original overlay title to declutter the image, but keep the manufacturer info
-        document.getElementById('tbl-name').style.display = 'none';
-        
-        document.getElementById('tbl-mfr').textContent  = entry
-            ? `${entry.manufacturer}${version ? ' · v'+version : ''}`
-            : (version ? 'v'+version : 'VPC Competition');
+        document.getElementById('main-header-title').textContent = entry ? entry.name : (fallbackName || 'Tournament Table');
     }
 
     function renderBoard(players) {
@@ -289,16 +272,16 @@
             return;
         }
         const rows = Math.min(Math.ceil(players.length / 2), 5);
-        document.getElementById('lb-list').style.gridTemplateRows = `repeat(${rows}, auto)`;
+        document.getElementById('lb-list').style.gridTemplateRows = `repeat(${rows}, 1fr)`;
         const cls = i => i===0?'r1':i===1?'r2':i===2?'r3':'';
         document.getElementById('lb-list').innerHTML = players.map((p,i) => {
             const av = p.userAvatarUrl ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1a1a2e&color=aaa&size=90&bold=true`;
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1a1a2e&color=aaa&size=100&bold=true`;
             return `
             <div class="lb-row ${cls(i)}">
                 <span class="rank-num">${i+1}</span>
                 <img class="avatar" src="${av}"
-                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1a1a2e&color=aaa&size=90&bold=true'"
+                     onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.username)}&background=1a1a2e&color=aaa&size=100&bold=true'"
                      alt="">
                 <div class="player-info">
                     <span class="player-name">${p.username}</span>
